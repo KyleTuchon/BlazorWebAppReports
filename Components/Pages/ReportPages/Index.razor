@@ -27,13 +27,6 @@
 <br />
 <br />
 
-<QuickGrid Class="table" Items="context.Report">
-    <PropertyColumn Property="report => report.Id" />
-    <PropertyColumn Property="report => report.Title" />
-    <PropertyColumn Property="report => report.DueDate" />
-    <PropertyColumn Property="report => report.Type" />
-    <PropertyColumn Property="report => report.Priority" />
-    <PropertyColumn Property="report => report.Description" />
 <QuickGrid Class="table" Items="context.Report" Pagination="pagination">
     <PropertyColumn Property="report =>report.Id" Sortable="true" />
     <Paginator State="pagination" />

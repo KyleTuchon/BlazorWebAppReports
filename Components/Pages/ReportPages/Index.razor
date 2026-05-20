@@ -34,6 +34,15 @@
     <PropertyColumn Property="report => report.Type" />
     <PropertyColumn Property="report => report.Priority" />
     <PropertyColumn Property="report => report.Description" />
+<QuickGrid Class="table" Items="context.Report" Pagination="pagination">
+    <PropertyColumn Property="report =>report.Id" Sortable="true" />
+    <Paginator State="pagination" />
+
+    <PropertyColumn Property="report => report.Title"  Sortable="true" />
+    <PropertyColumn Property="report => report.DueDate" Sortable="true" />
+    <PropertyColumn Property="report => report.Type" Sortable="true" />
+    <PropertyColumn Property="report => report.Priority" Sortable="true" />
+    <PropertyColumn Property="report => report.Description" Sortable="true" />
 
     <TemplateColumn Context="report">
     <a href="@($"reports/edit?id={report.Id}")">Edit</a> |
@@ -46,6 +55,7 @@
 </QuickGrid>
 
 @code {
+    private PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
     private ApplicationDbContext context = default!;
 
     protected override void OnInitialized()

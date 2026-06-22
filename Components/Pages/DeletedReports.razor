@@ -45,9 +45,20 @@
 
             Status: @report.Status<br />
 
-            Description: @report.Description<br />
+                Description: @report.Description<br />
 
-            Deleted: @report.DeletedDate
+                @if (!string.IsNullOrWhiteSpace(report.ImagePath))
+                {
+                    <strong>Proof Image:</strong><br />
+                    <a href="@report.ImagePath" target="_blank">
+                    <img src="@report.ImagePath"
+                            style="max-width:200px; max-height:200px; border:1px solid #ccc;" />
+                    </a>
+                    <br />
+                }
+
+                Deleted: @report.DeletedDate
+            );
         </li>
 
         <br />

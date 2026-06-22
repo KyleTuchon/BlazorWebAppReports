@@ -44,7 +44,12 @@
 
             <div class="mb-3">
                 <label for="priority" class="form-label">Priority:</label>
-                <InputNumber id="priority" @bind-Value="NewReport.Priority" class="form-control" />
+                <InputSelect id="priority" class="form-control" @bind-Value="NewReport.Priority">
+                    <option value="1">1 - Low</option>
+                    <option value="2">2 - Medium</option>
+                    <option value="3">3 - High</option>
+                    <option value="4">4 - Critical</option>
+                </InputSelect>
                 <ValidationMessage For="() => NewReport.Priority" class="text-danger" />
             </div>
 
@@ -80,6 +85,11 @@
                 <ValidationMessage For="() => NewReport.Description" class="text-danger" />
             </div>
 
+            <div class="mb-3">
+                <label class="form-label">Upload Proof Image:</label>
+                <InputFile OnChange="HandleFileUpload" class="form-control" />
+            </div>
+
             <button type="submit" class="btn btn-primary">Create</button>
             <a href="/reports" class="btn btn-secondary ms-2">Cancel</a>
         </EditForm>
@@ -92,10 +102,36 @@
 
 @code {
     private Report NewReport { get; set; } = new();
+    private IBrowserFile? uploadedFile;
+
+    private void HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        uploadedFile = e.File;
+    }
 
     private async Task AddReport()
     {
         using var context = DbFactory.CreateDbContext();
+
+        if (uploadedFile is not null)
+        {
+            var uploadsFolder = Path.Combine(Environment.CurrentDirectory, "wwwroot", "uploads");
+
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            var fileName = $"{Guid.NewGuid()}_{uploadedFile.Name}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            await using var stream = uploadedFile.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024);
+            await using var fileStream = new FileStream(filePath, FileMode.Create);
+
+            await stream.CopyToAsync(fileStream);
+
+            NewReport.ImagePath = $"/uploads/{fileName}";
+        }
 
         context.Report.Add(NewReport);
 

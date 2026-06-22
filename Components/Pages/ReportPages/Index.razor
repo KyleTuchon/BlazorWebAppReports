@@ -47,6 +47,19 @@
     <PropertyColumn Property="report => report.Status" Sortable="true" />
     <PropertyColumn Property="report => report.Description" Sortable="true" />
 
+    <TemplateColumn Title="Proof Image" Context="report">
+        @if (!string.IsNullOrWhiteSpace(report.ImagePath))
+        {
+            <a href="@report.ImagePath" target="_blank">
+                <img src="@report.ImagePath" style="max-width:80px; max-height:80px;" />
+            </a>
+        }
+        else
+        {
+            <span>No Image</span>
+        }
+    </TemplateColumn>
+
     <TemplateColumn Context="report">
         <a href="@($"reports/edit?id={report.Id}")">
             <button type="button">Edit</button>

@@ -2,17 +2,31 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="hero-section">
+    <span class="badge">APTC 495 — Team Kaizen</span>
+    <h1>Kaizen Ticketing Platform</h1>
+    <p>
+        A centralized ticket and workflow management system for tracking bugs,
+        feature requests, priorities, assignments, and project tasks.
+    </p>
 
-Welcome to APTC 495.
+    <a class="btn btn-primary" href="/reports">View Tickets</a>
+    <a class="btn btn-outline-primary ms-2" href="/Account/Register">Create Account</a>
+</div>
 
-<!-- Multi-statement block -->
-@{
-    var greeting = "Please pardon our appearance!";
-    var weekDay = DateTime.Now.DayOfWeek;
-    DateTime currentDate = DateTime.Now;
-    var greetingMessage = greeting;
-}
+<div class="feature-grid">
+    <a class="feature-card feature-link" href="/reports/create">
+        <h3>Create Tickets</h3>
+        <p>Submit bugs, features, and project tasks in one organized place.</p>
+    </a>
 
-<p>@greetingMessage</p>
-<p>Today is: @weekDay, @currentDate.ToShortDateString()</p>
+    <a class="feature-card feature-link" href="/reports">
+        <h3>Track Workflow</h3>
+        <p>Monitor status, priority, due dates, and assigned team members.</p>
+    </a>
+
+    <a class="feature-card feature-link" href="/archived-reports">
+        <h3>Archived Tickets</h3>
+        <p>View and manage archived tickets that have been completed or removed from the active workflow.</p>
+    </a>
+</div>

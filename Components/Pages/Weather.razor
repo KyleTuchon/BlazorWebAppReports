@@ -1,15 +1,22 @@
 ﻿@page "/weather"
-@attribute [StreamRendering]
+@rendermode InteractiveServer
+@inject IJSRuntime JS
+@inject HttpClient Http
+@using System.Text.Json.Serialization
 
 <PageTitle>Weather</PageTitle>
 
-<h1>Weather</h1>
+<h1>Local Weather</h1>
 
-<p>This component demonstrates showing data.</p>
+<p>This page shows weather based on the user's current location.</p>
 
-@if (forecasts == null)
+@if (!string.IsNullOrWhiteSpace(errorMessage))
 {
-    <p><em>Loading...</em></p>
+    <p class="text-danger">@errorMessage</p>
+}
+else if (forecasts == null)
+{
+    <p><em>Loading local weather...</em></p>
 }
 else
 {
@@ -17,8 +24,8 @@ else
         <thead>
             <tr>
                 <th>Date</th>
-                <th aria-label="Temperature in Celsius">Temp. (C)</th>
-                <th aria-label="Temperature in Fahrenheit">Temp. (F)</th>
+                <th>Temp. High (F)</th>
+                <th>Temp. Low (F)</th>
                 <th>Summary</th>
             </tr>
         </thead>
@@ -26,9 +33,9 @@ else
             @foreach (var forecast in forecasts)
             {
                 <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
+                    <td>@forecast.Date</td>
+                    <td>@forecast.TemperatureMax</td>
+                    <td>@forecast.TemperatureMin</td>
                     <td>@forecast.Summary</td>
                 </tr>
             }
@@ -38,27 +45,116 @@ else
 
 @code {
     private WeatherForecast[]? forecasts;
+    private string? errorMessage;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        // Simulate asynchronous loading to demonstrate streaming rendering
-        await Task.Delay(500);
+        if (!firstRender)
+            return;
 
-        var startDate = DateOnly.FromDateTime(DateTime.Now);
-        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
-        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
+        try
         {
-            Date = startDate.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = summaries[Random.Shared.Next(summaries.Length)]
-        }).ToArray();
+            var location = await JS.InvokeAsync<UserLocation>("getUserLocation");
+
+            var url =
+                $"https://api.open-meteo.com/v1/forecast" +
+                $"?latitude={location.Latitude}" +
+                $"&longitude={location.Longitude}" +
+                $"&daily=temperature_2m_max,temperature_2m_min,weather_code" +
+                $"&temperature_unit=fahrenheit" +
+                $"&timezone=auto";
+
+            var result = await Http.GetFromJsonAsync<OpenMeteoResponse>(url);
+
+                Console.WriteLine($"Result Null: {result is null}");
+Console.WriteLine($"Daily Null: {result?.Daily is null}");
+
+if (result?.Daily != null)
+{
+    Console.WriteLine($"Time Length: {result.Daily.Time.Length}");
+    Console.WriteLine($"Max Length: {result.Daily.TemperatureMax.Length}");
+    Console.WriteLine($"Min Length: {result.Daily.TemperatureMin.Length}");
+    Console.WriteLine($"Code Length: {result.Daily.WeatherCode.Length}");
+}
+
+           if (result?.Daily is not null)
+{
+    var count = new[]
+    {
+        result.Daily.Time.Length,
+        result.Daily.TemperatureMax.Length,
+        result.Daily.TemperatureMin.Length,
+        result.Daily.WeatherCode.Length
+    }.Min();
+
+    forecasts = Enumerable.Range(0, count)
+        .Select(index => new WeatherForecast
+        {
+            Date = result.Daily.Time[index],
+            TemperatureMax = result.Daily.TemperatureMax[index],
+            TemperatureMin = result.Daily.TemperatureMin[index],
+            Summary = GetWeatherSummary(result.Daily.WeatherCode[index])
+        })
+        .ToArray();
+}
+        }
+        catch (Exception ex)
+        {
+        errorMessage = ex.Message;
+        forecasts = Array.Empty<WeatherForecast>();
+        }
+
+        StateHasChanged();
     }
+
+    private static string GetWeatherSummary(int code)
+    {
+        return code switch
+        {
+            0 => "Clear",
+            1 or 2 or 3 => "Partly cloudy",
+            45 or 48 => "Fog",
+            51 or 53 or 55 => "Drizzle",
+            61 or 63 or 65 => "Rain",
+            71 or 73 or 75 => "Snow",
+            80 or 81 or 82 => "Rain showers",
+            95 => "Thunderstorm",
+            _ => "Unknown"
+        };
+    }
+
+    private class UserLocation
+    {
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+    }
+
+    private class OpenMeteoResponse
+{
+    [JsonPropertyName("daily")]
+    public DailyWeather? Daily { get; set; }
+}
+
+private class DailyWeather
+{
+    [JsonPropertyName("time")]
+    public string[] Time { get; set; } = [];
+
+    [JsonPropertyName("temperature_2m_max")]
+    public double[] TemperatureMax { get; set; } = [];
+
+    [JsonPropertyName("temperature_2m_min")]
+    public double[] TemperatureMin { get; set; } = [];
+
+    [JsonPropertyName("weather_code")]
+    public int[] WeatherCode { get; set; } = [];
+}
 
     private class WeatherForecast
     {
-        public DateOnly Date { get; set; }
-        public int TemperatureC { get; set; }
-        public string? Summary { get; set; }
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+        public string Date { get; set; } = "";
+        public double TemperatureMax { get; set; }
+        public double TemperatureMin { get; set; }
+        public string Summary { get; set; } = "";
     }
 }

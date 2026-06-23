@@ -4,6 +4,7 @@
 @using BlazorWebAppReports.Models
 @inject IDbContextFactory<BlazorWebAppReports.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
+@inject IWebHostEnvironment Environment
 
 <PageTitle>Create</PageTitle>
 
@@ -115,7 +116,7 @@
 
         if (uploadedFile is not null)
         {
-            var uploadsFolder = Path.Combine(Environment.CurrentDirectory, "wwwroot", "uploads");
+            var uploadsFolder = Path.Combine(Environment.WebRootPath, "uploads");
 
             if (!Directory.Exists(uploadsFolder))
             {

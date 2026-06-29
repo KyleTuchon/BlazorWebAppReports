@@ -2,8 +2,10 @@
 @rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using BlazorWebAppReports.Models
+@using Microsoft.AspNetCore.Components.Forms
 @inject IDbContextFactory<BlazorWebAppReports.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
+@inject IWebHostEnvironment Environment
 
 <PageTitle>Edit Report</PageTitle>
 
@@ -54,7 +56,7 @@ else
                         <option value="1">1 - Low</option>
                         <option value="2">2 - Medium</option>
                         <option value="3">3 - High</option>
-                        <option value="4">4 - Urgent</option>
+                        <option value="4">4 - Critical</option>
                     </InputSelect>
                     <ValidationMessage For="() => Report.Priority" class="text-danger" />
                 </div>
@@ -91,6 +93,27 @@ else
                     <ValidationMessage For="() => Report.Description" class="text-danger" />
                 </div>
 
+                @if (!string.IsNullOrWhiteSpace(Report.ImagePath))
+                {
+                    <div class="mb-3">
+                        <label class="form-label">Current Proof Image:</label>
+                        <br />
+                        <img src="@Report.ImagePath"
+                             alt="Current proof image"
+                             style="max-width: 250px; max-height: 250px; border: 1px solid #ccc; border-radius: 8px;" />
+                        <br />
+                        <a href="@Report.ImagePath" target="_blank">View Full Image</a>
+                    </div>
+                }
+
+                <div class="mb-3">
+                    <label class="form-label">Upload New Proof Image:</label>
+                    <InputFile OnChange="HandleFileUpload" class="form-control" />
+                    <small class="text-muted">
+                        Leave blank to keep the current image.
+                    </small>
+                </div>
+
                 <button type="submit" class="btn btn-primary">Save</button>
                 <a href="/reports" class="btn btn-secondary ms-2">Cancel</a>
             </EditForm>
@@ -108,6 +131,8 @@ else
 
     private Report? Report { get; set; }
 
+    private IBrowserFile? uploadedFile;
+
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
@@ -120,6 +145,11 @@ else
         }
     }
 
+    private void HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        uploadedFile = e.File;
+    }
+
     private async Task UpdateReport()
     {
         if (Report is null)
@@ -128,6 +158,26 @@ else
         }
 
         using var context = DbFactory.CreateDbContext();
+
+        if (uploadedFile is not null)
+        {
+            var uploadsFolder = Path.Combine(Environment.WebRootPath, "uploads");
+
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            var fileName = $"{Guid.NewGuid()}_{uploadedFile.Name}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            await using var stream = uploadedFile.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024);
+            await using var fileStream = new FileStream(filePath, FileMode.Create);
+
+            await stream.CopyToAsync(fileStream);
+
+            Report.ImagePath = $"/uploads/{fileName}";
+        }
 
         context.Attach(Report).State = EntityState.Modified;
 

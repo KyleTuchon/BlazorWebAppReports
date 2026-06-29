@@ -50,7 +50,12 @@ else
 
                 <div class="mb-3">
                     <label for="priority" class="form-label">Priority:</label>
-                    <InputNumber id="priority" @bind-Value="Report.Priority" class="form-control" />
+                    <InputSelect id="priority" class="form-control" @bind-Value="Report.Priority">
+                        <option value="1">1 - Low</option>
+                        <option value="2">2 - Medium</option>
+                        <option value="3">3 - High</option>
+                        <option value="4">4 - Urgent</option>
+                    </InputSelect>
                     <ValidationMessage For="() => Report.Priority" class="text-danger" />
                 </div>
 
@@ -99,7 +104,7 @@ else
 
 @code {
     [SupplyParameterFromQuery]
-    private int Id { get; set; }
+    public int Id { get; set; }
 
     private Report? Report { get; set; }
 
@@ -111,7 +116,7 @@ else
 
         if (Report is null)
         {
-            NavigationManager.NotFound();
+            NavigationManager.NavigateTo("/reports");
         }
     }
 
@@ -135,7 +140,7 @@ else
         {
             if (!ReportExists(Report.Id))
             {
-                NavigationManager.NotFound();
+                NavigationManager.NavigateTo("/reports");
             }
             else
             {

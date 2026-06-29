@@ -1,32 +1,113 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@inject NavigationManager Navigation
+
 
 <PageTitle>Home</PageTitle>
 
-<div class="hero-section">
-    <span class="badge">APTC 495 — Team Kaizen</span>
-    <h1>Kaizen Ticketing Platform</h1>
+<div class="hero">
+    <div class="badge">APTC 495 — Team Kaizen</div>
+
+    <h1>
+        Manage tickets.<br />
+        Track <span>everything</span>.
+    </h1>
+
     <p>
-        A centralized ticket and workflow management system for tracking bugs,
-        feature requests, priorities, assignments, and project tasks.
+        A centralized help desk and workflow management platform for Agile development teams.
+        Submit, assign, and resolve tickets in one organized place.
     </p>
 
-    <a class="btn btn-primary" href="/reports">View Tickets</a>
-    <a class="btn btn-outline-primary ms-2" href="/Account/Register">Create Account</a>
+    <div class="hero-actions">
+        <button type="button" class="btn btn-primary" @onclick="@(() => Navigation.NavigateTo("/reports"))">
+            View Tickets
+        </button>
+
+        <button type="button" class="btn btn-outline" @onclick="@(() => Navigation.NavigateTo("/Account/Register"))">
+            Create Account
+        </button>
+    </div>
 </div>
 
-<div class="feature-grid">
-    <a class="feature-card feature-link" href="/reports/create">
-        <h3>Create Tickets</h3>
-        <p>Submit bugs, features, and project tasks in one organized place.</p>
-    </a>
+<div class="content">
 
-    <a class="feature-card feature-link" href="/reports">
-        <h3>Track Workflow</h3>
-        <p>Monitor status, priority, due dates, and assigned team members.</p>
-    </a>
+    <div class="info-strip">
+        <span class="info-dot"></span>
+        <span>
+            <strong>Platform is live.</strong>
+            Built with ASP.NET Blazor, C#, SQL Server, and deployed on Microsoft Azure.
+        </span>
+    </div>
 
-    <a class="feature-card feature-link" href="/archived-reports">
-        <h3>Archived Tickets</h3>
-        <p>View and manage archived tickets that have been completed or removed from the active workflow.</p>
-    </a>
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-value">CRUD</div>
+            <div class="stat-label">Create, View, Edit, Delete</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-value">SQL</div>
+            <div class="stat-label">Live database integration</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-value">Agile</div>
+            <div class="stat-label">Sprint-based methodology</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-value">QA</div>
+            <div class="stat-label">Manual & automated testing</div>
+        </div>
+    </div>
+
+    <div class="section-title">What this platform does</div>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <h3>Ticket Management</h3>
+            <p>Create, view, edit, and delete help desk tickets with ID, priority, type, and assignment.</p>
+        </div>
+
+        <div class="feature-card">
+            <h3>Sortable Grid View</h3>
+            <p>View tickets in an organized grid and monitor workflow details quickly.</p>
+        </div>
+
+        <div class="feature-card">
+            <h3>Search & Filter</h3>
+            <p>Search tickets by keyword and locate bugs, features, or requests quickly.</p>
+        </div>
+
+        <div class="feature-card">
+            <h3>User Accounts</h3>
+            <p>Register and log in to access the platform and manage assigned tickets.</p>
+        </div>
+
+        <div class="feature-card">
+            <h3>Export & Archive</h3>
+            <p>Export ticket data as CSV and archive completed tickets.</p>
+        </div>
+
+        <div class="feature-card">
+            <h3>Priority Tracking</h3>
+            <p>Assign priority levels so the team can focus on the most pressing issues.</p>
+        </div>
+    </div>
+
+    <div class="cta-banner">
+        <h2>Ready to get started?</h2>
+        <p>Register for an account or log in to start submitting and managing tickets.</p>
+
+        <div class="cta-actions">
+            <button type="button" class="btn btn-primary" @onclick="@(() => Navigation.NavigateTo("/Account/Register"))">
+                Register
+            </button>
+
+            <button type="button" class="btn btn-outline" @onclick="@(() => Navigation.NavigateTo("/Account/Login"))">
+                Log In
+            </button>
+        </div>
+    </div>
+
 </div>
